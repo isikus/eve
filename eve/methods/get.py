@@ -10,8 +10,6 @@
     :copyright: (c) 2017 by Nicola Iarocci.
     :license: BSD, see LICENSE for more details.
 """
-from __future__ import division
-
 import math
 
 import copy
@@ -263,9 +261,10 @@ def _perform_find(resource, lookup):
     # If-Modified-Since disabled on collections (#334)
     req.if_modified_since = None
 
-    cursor, count = app.data.find(
+    cursor = app.data.find(
         resource, req, lookup, perform_count=not config.OPTIMIZE_PAGINATION_FOR_SPEED
     )
+    count = cursor.count()
     # If soft delete is enabled, data.find will not include items marked
     # deleted unless req.show_deleted is True
     for document in cursor:
@@ -640,7 +639,7 @@ def _pagination_links(resource, req, document_count, document_id=None):
             }
 
             if document_count:
-                last_page = int(math.ceil(document_count / req.max_results))
+                last_page = int(math.ceil(document_count / float(req.max_results)))
                 q = querydef(
                     req.max_results,
                     req.where,
